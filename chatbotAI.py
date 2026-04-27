@@ -1,12 +1,18 @@
-#importing Natural Language ToolKit
-import nltk
-#downloading 'punkt_tab' which is essentially a language file from the internet.
-nltk.download('punkt_tab')
-#grabbing one tool from the toolbox NLTK
-from nltk.tokenize import word_tokenize
+
 #from the toolboxes, it is importing a tool to help with the ML code
 from sklearn.feature_extraction.text import CountVectorizer#turns words into numbers
 from sklearn.naive_bayes import MultinomialNB#the brain and learns from those numbers
+#imports operating system so it can talk to the code and vise versa
+import os
+#importing google ai because it is free (OPENAI is not and wont run unless you add funds)
+import google.generativeai as genai
+
+api_key = os.getenv("GEMINI_API_KEY")
+genai.configure(api_key=api_key)
+
+model = genai.GenerativeModel("gemini-2.0-flash")
+reply = model.generate_content("say hello!")
+print(reply.text)
 
 #list of tuples with types of 'greeting', 'help', and 'goodbye'
 sayings = [
@@ -45,15 +51,15 @@ vectorizer = CountVectorizer()
 # transform → converts those phrases into numbers
 X_vectorized = vectorizer.fit_transform(X)
 #taking the tool into the code and hasnt been used yet
-model = MultinomialNB()
+ml_model = MultinomialNB()
 #X_vectorized → the numbers representing phrases
 # Y → the correct labels
-model.fit(X_vectorized, Y)
+ml_model.fit(X_vectorized, Y)
 
 #creating a new function that reads the ML code and input it into the actual code
 def classify(bot):
     fitting = vectorizer.transform([bot]) 
-    storage = model.predict(fitting)
+    storage = ml_model.predict(fitting)
     return storage
 
 def response(intent):
@@ -74,7 +80,7 @@ while True:
     #Chatbot asking you what you need
     bot = input("What can I help you with?")
 
-    if bot.lower() == "quit":
+    if bot.lower() in ["quit", "exit"]:
         print("Exiting code.")
         break
     #calling the classify function and setting the parameter to "bot", so it reads your input
