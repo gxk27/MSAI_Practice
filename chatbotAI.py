@@ -8,7 +8,7 @@ from nltk.tokenize import word_tokenize
 from sklearn.feature_extraction.text import CountVectorizer#turns words into numbers
 from sklearn.naive_bayes import MultinomialNB#the brain and learns from those numbers
 
-#list of tuples regarding a greeting, help, and goodbye
+#list of tuples with types of 'greeting', 'help', and 'goodbye'
 sayings = [
     ("hello", "greeting"),
     ("yo", "greeting"),
@@ -55,10 +55,6 @@ def classify(bot):
     fitting = vectorizer.transform([bot]) 
     storage = model.predict(fitting)
     return storage
-#creating a funciton that will tokenize what the user inputs "reading the input based off keywords"
-def tokensizer(bot):
-    tokens = word_tokenize(bot)
-    return tokens
 
 def response(intent):
     if intent[0] == 'greeting':
@@ -84,4 +80,3 @@ while True:
     #calling the classify function and setting the parameter to "bot", so it reads your input
     intent = classify(bot)
     response(intent)
-
