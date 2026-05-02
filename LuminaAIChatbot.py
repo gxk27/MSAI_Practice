@@ -77,6 +77,8 @@ ml_model = MultinomialNB()
 # Y → the correct labels
 ml_model.fit(X_vectorized, Y)
 
+# yooo
+
 #creating a new function that reads the ML code and input it into the actual code
 def classify(bot):
     fitting = vectorizer.transform([bot]) 
