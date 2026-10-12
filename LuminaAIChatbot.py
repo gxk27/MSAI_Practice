@@ -1,3 +1,5 @@
+import csv
+from datetime import datetime
 #from the toolboxes, it is importing a tool to help with the ML code
 from sklearn.feature_extraction.text import CountVectorizer#turns words into numbers
 from sklearn.naive_bayes import MultinomialNB#the brain and learns from those numbers
@@ -5,6 +7,35 @@ from sklearn.naive_bayes import MultinomialNB#the brain and learns from those nu
 import os
 #import Groq
 from groq import Groq
+
+def save_to_csv(user_input, bot_reply, filename="lumina_history.csv"):
+    file_exists = os.path.isfile(filename)
+    
+    with open(filename, "a", newline="", encoding="utf-8") as f:
+        writer = csv.DictWriter(f, fieldnames=["timestamp", "user", "lumina"])
+        
+        if not file_exists:
+            writer.writeheader()  # only writes column names on first creation
+        
+        writer.writerow({
+            "timestamp": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+            "user": user_input,
+            "lumina": bot_reply
+        })
+
+def show_history(filename="lumina_history.csv"):
+    if not os.path.isfile(filename):
+        print("No history yet!")
+        return
+    
+    with open(filename, "r", encoding="utf-8") as f:
+        reader = csv.DictReader(f)
+        spacers()
+        print(f"{'TIMESTAMP':<22} {'YOU':<30} {'LUMINA':<50}")
+        spacers()
+        for row in reader:
+            print(f"{row['timestamp']:<22} {row['user']:<30} {row['lumina'][:47] + '...' if len(row['lumina']) > 50 else row['lumina']:<50}")
+        spacers()
 
 #creating spacers so output is more organized
 def spacers():
@@ -77,8 +108,6 @@ ml_model = MultinomialNB()
 # Y → the correct labels
 ml_model.fit(X_vectorized, Y)
 
-# yooo
-
 #creating a new function that reads the ML code and input it into the actual code
 def classify(bot):
     fitting = vectorizer.transform([bot]) 
@@ -86,24 +115,26 @@ def classify(bot):
     return storage
 
 #grabbing the ask_groq function and creating a variable for it
-def response(conversation_history,user_input):
+def response(conversation_history, user_input):
     spacers()
     groq_reply = ask_groq(user_input, conversation_history)
     print(groq_reply)
     spacers()
+    save_to_csv(user_input, groq_reply) 
 
 #Will keep the history of the conversations between you and Lumina!
 conversationHistory = []
 
 while True:
+    bot = input("Hello I am Lumina! What can I help you with? ")
 
-    #Lumina asking you what you need
-    bot = input(" What can I help you with?")
-    
     if bot.lower() in ["quit", "exit"]:
         spacers()
-        print(f"Goodbye!")
+        day = datetime.now().strftime("%A")  # grabs the full day name
+        print(f"Goodbye! Have a good {day}!")
         break
-    #calling the classify function and setting the parameter to "bot", so it reads your input
-    intent = classify(bot)
+    
+    elif bot.lower() in ["history", "show history"]: 
+        show_history()
+        continue
     response(conversationHistory, bot)
